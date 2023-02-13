@@ -28,9 +28,9 @@ impl Physics for Car {
         self.steer += STEER_SPEED.min(steer_diff.abs()) * steer_diff.signum();
         self.steer = MAX_STEER.min(self.steer.abs()) * self.steer.signum();
 
-        self.orientation += self.steer * self.speed / UPS;
+        self.position.orientation += self.steer * self.speed / UPS;
 
-        self.coordinates.0 += self.speed * self.orientation.cos() / UPS;
-        self.coordinates.1 += self.speed * self.orientation.sin() / UPS;
+        self.position.coordinates.0 += self.speed * self.position.orientation.cos() / UPS;
+        self.position.coordinates.1 += self.speed * self.position.orientation.sin() / UPS;
     }
 }

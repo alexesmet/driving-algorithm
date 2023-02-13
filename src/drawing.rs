@@ -1,60 +1,99 @@
-use crate::model::Car;
+use crate::model::{Car, Roundabout};
 use nannou::prelude::*;
 
 pub trait Drawing {
     fn draw(&self, draw: &Draw);
 }
 
+pub trait DrawingDebug {
+    fn draw_debug(&self, draw: &Draw);
+}
+
+
 const STEER_FACTOR: f32 = 40.0;
 
 impl Drawing for Car {
     fn draw(&self, draw: &Draw) {
 
-        let wheel_fl = get_coords_for_wheels(self.coordinates, self.orientation, ( 10., 9.));
-        let wheel_fr = get_coords_for_wheels(self.coordinates, self.orientation, ( 10.,-9.));
-        let wheel_bl = get_coords_for_wheels(self.coordinates, self.orientation, (-10., 9.));
-        let wheel_br = get_coords_for_wheels(self.coordinates, self.orientation, (-10.,-9.));
+        let wheel_fl = get_coords_for_wheels(self.position.coordinates, self.position.orientation, ( 10., 9.));
+        let wheel_fr = get_coords_for_wheels(self.position.coordinates, self.position.orientation, ( 10.,-9.));
+        let wheel_bl = get_coords_for_wheels(self.position.coordinates, self.position.orientation, (-10., 9.));
+        let wheel_br = get_coords_for_wheels(self.position.coordinates, self.position.orientation, (-10.,-9.));
 
         draw.rect()
             .width(7.0)
             .height(4.0)
             .x_y(wheel_fl.0, wheel_fl.1)
-            .rotate(self.orientation + self.steer * STEER_FACTOR)
+            .rotate(self.position.orientation + self.steer * STEER_FACTOR)
             .color(DARKSLATEGREY);
 
         draw.rect()
             .width(7.0)
             .height(4.0)
             .x_y(wheel_fr.0, wheel_fr.1)
-            .rotate(self.orientation + self.steer * STEER_FACTOR)
+            .rotate(self.position.orientation + self.steer * STEER_FACTOR)
             .color(DARKSLATEGREY);
 
         draw.rect()
             .width(7.0)
             .height(4.0)
             .x_y(wheel_bl.0, wheel_bl.1)
-            .rotate(self.orientation)
+            .rotate(self.position.orientation)
             .color(DARKSLATEGREY);
 
         draw.rect()
             .width(7.0)
             .height(4.0)
             .x_y(wheel_br.0, wheel_br.1)
-            .rotate(self.orientation)
+            .rotate(self.position.orientation)
             .color(DARKSLATEGREY);
 
         draw.rect()
             .width(40.0)
             .height(20.0)
-            .rotate(self.orientation)
-            .x_y(self.coordinates.0, self.coordinates.1)
+            .rotate(self.position.orientation)
+            .x_y(self.position.coordinates.0, self.position.coordinates.1)
             .color(STEELBLUE);
 
     }
 }
 
+impl DrawingDebug for Car {
+    fn draw_debug(&self, draw: &Draw) {
+        if let Some(desired) = &self.debug.desired_position {
+            draw.line()
+                .start(pt2(self.position.coordinates.0, self.position.coordinates.1))
+                .end(pt2(desired.coordinates.0, desired.coordinates.1))
+                .weight(2.0)
+                .color(GAINSBORO);
+
+            draw.rect()
+                .width(40.0)
+                .height(20.0)
+                .roll(desired.orientation)
+                .x_y(desired.coordinates.0, desired.coordinates.1)
+                .color(GAINSBORO);
+        }
+    }
+}
+
+
+
 fn get_coords_for_wheels(origin: (f32, f32), rot: f32, shift: (f32, f32)) -> (f32, f32) {
     let x = origin.0 + shift.0 * rot.cos() + shift.1 * -rot.sin();
     let y = origin.1 + shift.0 * rot.sin() + shift.1 *  rot.cos();
     return (x,y);
+}
+
+impl Drawing for Roundabout {
+    fn draw(&self, draw: &Draw) {
+        draw.ellipse()
+            .w(self.radius * 2.)
+            .h(self.radius * 2.)
+            .x_y(self.coordinates.0, self.coordinates.1)
+            .stroke_weight(2.0)
+            .stroke_color(GAINSBORO)
+            .no_fill();
+
+    }
 }
