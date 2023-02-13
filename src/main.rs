@@ -39,6 +39,8 @@ fn view(app: &App, model: &Model, frame: Frame){
     
     // Prepare to draw.
     let draw = app.draw();
+    let window = app.main_window();
+    let win = window.rect();
 
     draw.background().color(WHITESMOKE);
 
@@ -46,6 +48,17 @@ fn view(app: &App, model: &Model, frame: Frame){
 
     model.road.draw(&draw);
     model.car.draw(&draw);
+
+    let pad = 6.0;
+    let car_debug = format!("{:#?}", model.car);
+    draw.text(&car_debug)
+            .h(win.pad(pad).h())
+            .w(win.pad(pad).w())
+            .line_spacing(pad)
+            .font_size(14)
+            .align_text_bottom()
+            .color(GRAY)
+            .left_justify();
     
     draw.to_frame(app, &frame).unwrap();
 }
