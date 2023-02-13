@@ -6,7 +6,7 @@ pub trait Thinker {
 
 impl Thinker for Car {
     fn think(&mut self) {
-        self.speed = 80.;
-        self.steer = 0.01;
+        self.desired_speed = 130.;
+        self.desired_steer = 0.01;
     }
 }
