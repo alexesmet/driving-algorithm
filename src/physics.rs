@@ -1,6 +1,4 @@
-use std::f32::consts::PI;
-
-use crate::model::Car;
+use crate::{model::Car, util::normalize_angle};
 
 const UPS: f32 = 60.;
 
@@ -31,7 +29,7 @@ impl Physics for Car {
         self.steer = MAX_STEER.min(self.steer.abs()) * self.steer.signum();
 
         self.position.orientation += self.steer * self.speed / UPS;
-        self.position.orientation = self.position.orientation - 2.0*PI * ((self.position.orientation + PI) / (2.0*PI)).floor();
+        self.position.orientation = normalize_angle(self.position.orientation);
 
         self.position.coordinates.0 += self.speed * self.position.orientation.cos() / UPS;
         self.position.coordinates.1 += self.speed * self.position.orientation.sin() / UPS;

@@ -75,13 +75,39 @@ impl DrawingDebug for Car {
                 .color(GAINSBORO);
         }
 
-        if let Some(angle) = &self.debug.angle_to_desired {
+        if let Some(angle) = &self.debug.angle_to_position {
             let arrow_len = 30.0;
             draw.arrow()
                 .start_cap_round()
                 .head_length(8.0)
                 .head_width(4.0)
                 .color(DARKRED)
+                .start(pt2(self.position.coordinates.0, self.position.coordinates.1))
+                .end(pt2(self.position.coordinates.0 + (self.position.orientation + angle).cos() * arrow_len, 
+                         self.position.coordinates.1 + (self.position.orientation + angle).sin() * arrow_len));
+
+        }
+
+        if let Some(angle) = &self.debug.angle_to_orientation {
+            let arrow_len = 30.0;
+            draw.arrow()
+                .start_cap_round()
+                .head_length(8.0)
+                .head_width(4.0)
+                .color(DARKGREEN)
+                .start(pt2(self.position.coordinates.0, self.position.coordinates.1))
+                .end(pt2(self.position.coordinates.0 + (self.position.orientation + angle).cos() * arrow_len, 
+                         self.position.coordinates.1 + (self.position.orientation + angle).sin() * arrow_len));
+
+        }
+
+        if let Some(angle) = &self.debug.turning_angle {
+            let arrow_len = 30.0;
+            draw.arrow()
+                .start_cap_round()
+                .head_length(8.0)
+                .head_width(4.0)
+                .color(BLACK)
                 .start(pt2(self.position.coordinates.0, self.position.coordinates.1))
                 .end(pt2(self.position.coordinates.0 + (self.position.orientation + angle).cos() * arrow_len, 
                          self.position.coordinates.1 + (self.position.orientation + angle).sin() * arrow_len));

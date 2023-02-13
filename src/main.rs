@@ -3,6 +3,7 @@ mod model;
 mod drawing;
 mod physics;
 mod algorithm;
+mod util;
 
 use algorithm::Thinker;
 use model::{Situation, Roundabout};
@@ -45,7 +46,6 @@ fn view(app: &App, model: &Model, frame: Frame){
     draw.background().color(WHITESMOKE);
 
     model.car.draw_debug(&draw);
-
     model.road.draw(&draw);
     model.car.draw(&draw);
 
@@ -55,10 +55,9 @@ fn view(app: &App, model: &Model, frame: Frame){
             .h(win.pad(pad).h())
             .w(win.pad(pad).w())
             .line_spacing(pad)
-            .font_size(14)
             .align_text_bottom()
             .color(GRAY)
             .left_justify();
-    
+
     draw.to_frame(app, &frame).unwrap();
 }

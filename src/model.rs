@@ -9,7 +9,9 @@ pub struct Position {
 #[derive(Debug)]
 pub struct CarDebugInfo {
     pub desired_position: Option<Position>,
-    pub angle_to_desired: Option<f32>,
+    pub angle_to_position: Option<f32>,
+    pub angle_to_orientation: Option<f32>,
+    pub turning_angle: Option<f32>,
 }
 
 #[derive(Debug)]
@@ -58,7 +60,7 @@ impl Default for Car {
 
 impl Default for CarDebugInfo {
     fn default() -> Self {
-        Self { desired_position: None, angle_to_desired: None }
+        Self { desired_position: None, angle_to_position: None, angle_to_orientation: None, turning_angle: None }
     }
 }
 
