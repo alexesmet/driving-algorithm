@@ -1,4 +1,4 @@
-use crate::model::{Car, Roundabout};
+use crate::model::{Car, Road, Roundabout};
 use nannou::prelude::*;
 
 pub trait Drawing {
@@ -134,5 +134,27 @@ impl Drawing for Roundabout {
             .stroke_color(GAINSBORO)
             .no_fill();
 
+    }
+}
+
+impl Drawing for Road {
+    fn draw(&self, draw: &Draw) {
+        match self {
+            Road::Turn { coordinates, radius, start_angle, end_angle } => {
+                let total_angle = end_angle - start_angle;
+                let angle_step = 5.0 * PI / radius;
+                let steps = (total_angle / angle_step).ceil() as i32;
+                let points = (0..=steps).map(|i| {
+                    let angle = start_angle + i as f32 * angle_step;
+                    pt2(coordinates.0 + radius * angle.cos(), coordinates.1 + radius * angle.sin())
+                });
+
+                draw.polyline()
+                    .weight(2.0)
+                    .color(GAINSBORO)
+                    .points(points);
+
+            },
+        }
     }
 }
