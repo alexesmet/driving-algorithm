@@ -12,12 +12,13 @@ impl Thinker for Car {
 
     fn think(&mut self) {
         let mut flag_to_swith_road = false;
-        match &self.road_node {
-            Some(road_node) => {
+        match self.navigator.get_road() {
+            road_node => {
                 self.brakes = false;
-                let borrowed_node = road_node.borrow();
-                match borrowed_node.road {
+                match road_node {
                     crate::model::Road::Turn { coordinates, radius, start_angle, end_angle, } => {
+                        
+                        // damn this is so complicated...
 
                         let rel_x = self.position.coordinates.0 - coordinates.0;
                         let rel_y = self.position.coordinates.1 - coordinates.1;
@@ -51,7 +52,7 @@ impl Thinker for Car {
                         self.desired_speed = 130.;
                         self.desired_steer = turning_angle.abs().min(FRAC_PI_4) / FRAC_PI_4 * MAX_STEER * turning_angle.signum() + target_steering * orientation_bias ;
 
-                        if angle > end_angle || angle < start_angle {
+                        if angle > *end_angle || angle < *start_angle {
                             flag_to_swith_road = true;
                         }
 
@@ -62,7 +63,7 @@ impl Thinker for Car {
                     },
                 }
             },
-            None => {
+            _ => {
                 // do nothing
                 self.brakes = true;
                 self.desired_speed = 0.;
@@ -74,9 +75,7 @@ impl Thinker for Car {
             }
         }
         if flag_to_swith_road {
-            if let Some(prev_road) = self.road_node.take() {
-                self.road_node = prev_road.borrow().next.clone();
-            }
+            self.navigator.switch_to_next_road();
         }
     }
 }

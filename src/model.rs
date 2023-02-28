@@ -1,5 +1,7 @@
 use std::{rc::Rc, cell::RefCell, fmt::Debug};
 
+use crate::navigator::Navigator;
+
 
 
 #[derive(Debug)]
@@ -28,12 +30,13 @@ pub struct Car {
     pub brakes: bool,
     pub desired_speed: f32,
     pub desired_steer: f32,
-    pub road_node: RoadNodeRef,
 
     pub speed: f32, 
     pub steer: f32,
     
     pub position: Position,
+
+    pub navigator: Navigator,
 
     pub debug: CarDebugInfo,
 }
@@ -44,7 +47,7 @@ impl Default for Car {
             brakes: false,
             desired_speed: 0.0,
             desired_steer: 0.0,
-            road_node: None,
+            navigator: todo!(),
 
             speed: 0.0,
             steer: 0.0,
@@ -71,18 +74,4 @@ pub enum Road {
     // Straight { start: (f32,f32), end: (f32,f32) },
     Turn { coordinates: (f32,f32), radius: f32, start_angle: f32, end_angle: f32 }
 }
-
-type RoadNodeRef = Option<Rc<RefCell<RoadNode>>>;
-
-pub struct RoadNode {
-    pub road: Road,
-    pub next: RoadNodeRef
-}
-
-impl Debug for RoadNode {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("RoadNode").field("road", &self.road).field("next", &"<hidden>").finish()
-    }
-}
-
 

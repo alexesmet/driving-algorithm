@@ -4,11 +4,12 @@ mod drawing;
 mod physics;
 mod algorithm;
 mod util;
+mod navigator;
 
 use std::{f32::consts::FRAC_PI_2, rc::Rc, cell::RefCell};
 
 use algorithm::Thinker;
-use model::{Road, RoadNode};
+use model::Road;
 use nannou::prelude::*;
 use drawing::{Drawing, DrawingDebug};
 use physics::Physics;
@@ -23,7 +24,6 @@ fn main() {
 
 struct Model {
     car: model::Car,
-    map: Vec<Rc<RefCell<RoadNode>>>
 }
 
 fn model(_app: &App) -> Model {
@@ -32,20 +32,9 @@ fn model(_app: &App) -> Model {
     let road_2 = Road::Turn { coordinates: ( 100.,-100.), radius: (300.), start_angle: ( FRAC_PI_2), end_angle: ( PI) };
     let road_3 = Road::Turn { coordinates: (-100.,-100.), radius: (100.), start_angle: (-PI), end_angle: (-FRAC_PI_2) };
     let road_4 = Road::Turn { coordinates: (-100., 100.), radius: (300.), start_angle: (-FRAC_PI_2), end_angle:  (0.) };
-    
-    let node_4 = Rc::new(RefCell::new( RoadNode { road: road_4, next: None }));
-    let node_3 = Rc::new(RefCell::new( RoadNode { road: road_3, next: Some(node_4.clone()) }));
-    let node_2 = Rc::new(RefCell::new( RoadNode { road: road_2, next: Some(node_3.clone()) }));
-    let node_1 = Rc::new(RefCell::new( RoadNode { road: road_1, next: Some(node_2.clone()) }));
-    
-    node_4.borrow_mut().next = Some(node_1.clone());
-    
-    let mut car = model::Car::default();
-    car.road_node = Some(node_4.clone());
 
     Model { 
-        car,
-        map: vec![node_1.clone(), node_2.clone(), node_3.clone(), node_4.clone()]
+        car: todo!()
     }
 }
 
@@ -62,8 +51,6 @@ fn view(app: &App, model: &Model, frame: Frame){
     let win = window.rect();
 
     draw.background().color(WHITESMOKE);
-
-    model.map.iter().for_each(|r| r.borrow().road.draw(&draw));
 
     model.car.draw_debug(&draw);
     model.car.draw(&draw);
