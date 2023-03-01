@@ -1,4 +1,4 @@
-use crate::model::{Car, Road, Roundabout};
+use crate::{model::{Car, Road, Roundabout}, navigator::RoadMap};
 use nannou::prelude::*;
 
 pub trait Drawing {
@@ -124,6 +124,14 @@ fn get_coords_for_wheels(origin: (f32, f32), rot: f32, shift: (f32, f32)) -> (f3
     return (x,y);
 }
 
+impl Drawing for RoadMap {
+    fn draw(&self, draw: &Draw) {
+        for road in self.get_roads() {
+            road.draw(&draw);
+        }
+    }
+}
+
 impl Drawing for Roundabout {
     fn draw(&self, draw: &Draw) {
         draw.ellipse()
@@ -140,7 +148,7 @@ impl Drawing for Roundabout {
 impl Drawing for Road {
     fn draw(&self, draw: &Draw) {
         match self {
-            Road::Turn { coordinates, radius, start_angle, end_angle } => {
+            Road::Turn { coordinates, radius, start_angle, end_angle, .. } => {
                 let total_angle = end_angle - start_angle;
                 let angle_step = 5.0 * PI / radius;
                 let steps = (total_angle / angle_step).ceil() as i32;

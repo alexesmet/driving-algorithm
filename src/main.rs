@@ -1,4 +1,3 @@
-
 mod model;
 mod drawing;
 mod physics;
@@ -6,13 +5,14 @@ mod algorithm;
 mod util;
 mod navigator;
 
-use std::{f32::consts::FRAC_PI_2, rc::Rc, cell::RefCell};
+use std::{f32::consts::FRAC_PI_2, rc::Rc};
 
 use algorithm::Thinker;
-use model::Road;
+use model::{Road, Car};
 use nannou::prelude::*;
 use drawing::{Drawing, DrawingDebug};
 use physics::Physics;
+use navigator::{RoadMap,RoadNode,Navigator};
 
 
 fn main() {
@@ -23,18 +23,34 @@ fn main() {
 }
 
 struct Model {
+    map: Rc<RoadMap>,
     car: model::Car,
+    debug: bool
 }
 
 fn model(_app: &App) -> Model {
 
-    let road_1 = Road::Turn { coordinates: ( 100., 100.), radius: (100.), start_angle: ( 0.), end_angle: ( FRAC_PI_2) };
-    let road_2 = Road::Turn { coordinates: ( 100.,-100.), radius: (300.), start_angle: ( FRAC_PI_2), end_angle: ( PI) };
-    let road_3 = Road::Turn { coordinates: (-100.,-100.), radius: (100.), start_angle: (-PI), end_angle: (-FRAC_PI_2) };
-    let road_4 = Road::Turn { coordinates: (-100., 100.), radius: (300.), start_angle: (-FRAC_PI_2), end_angle:  (0.) };
+    let args: Vec<String> = std::env::args().collect(); // I hate to put it here...
+    let debug = args.iter().any(|s| s == "--debug");
+
+    let road_1 = Road::Turn { coordinates: ( 100., 100.), radius: (100.), start_angle: ( 0.), end_angle: ( FRAC_PI_2), direction: model::RoadTurnDirection::CCW };
+    let road_2 = Road::Turn { coordinates: ( 100.,-100.), radius: (300.), start_angle: ( FRAC_PI_2), end_angle: ( PI), direction: model::RoadTurnDirection::CCW };
+    let road_3 = Road::Turn { coordinates: (-100.,-100.), radius: (100.), start_angle: (-PI), end_angle: (-FRAC_PI_2), direction: model::RoadTurnDirection::CCW };
+    let road_4 = Road::Turn { coordinates: (-100., 100.), radius: (300.), start_angle: (-FRAC_PI_2), end_angle:  (0.), direction: model::RoadTurnDirection::CCW };
+
+    let road_map = Rc::new(RoadMap::new(vec![
+         RoadNode { road: road_1, /* 0 */ next: vec![1] },
+         RoadNode { road: road_2, /* 1 */ next: vec![2] },
+         RoadNode { road: road_3, /* 2 */ next: vec![3] },
+         RoadNode { road: road_4, /* 3 */ next: vec![0] }
+    ]).expect("Should have created RoadMap"));
+
+    let navigator = Navigator::new(Rc::clone(&road_map), 0).expect("Should have created the navigator");
 
     Model { 
-        car: todo!()
+        map: road_map,
+        car: Car::from_navigator(navigator),
+        debug
     }
 }
 
@@ -45,14 +61,15 @@ fn update(_app: &App, model: &mut Model, _update: Update) {
 
 fn view(app: &App, model: &Model, frame: Frame){
     
-    // Prepare to draw.
     let draw = app.draw();
     let window = app.main_window();
     let win = window.rect();
 
     draw.background().color(WHITESMOKE);
+    
+    model.map.draw(&draw);
 
-    model.car.draw_debug(&draw);
+    if model.debug { model.car.draw_debug(&draw); }
     model.car.draw(&draw);
 
     let pad = 6.0;

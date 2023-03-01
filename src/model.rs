@@ -1,4 +1,5 @@
-use std::{rc::Rc, cell::RefCell, fmt::Debug};
+use std::fmt::Debug;
+use std::f32::consts::FRAC_PI_2;
 
 use crate::navigator::Navigator;
 
@@ -41,21 +42,20 @@ pub struct Car {
     pub debug: CarDebugInfo,
 }
 
-impl Default for Car {
-    fn default() -> Self {
+impl Car {
+    pub fn from_navigator(navigator: Navigator) -> Self {
+        let start = navigator.get_road().get_start();
+
         Self { 
             brakes: false,
             desired_speed: 0.0,
             desired_steer: 0.0,
-            navigator: todo!(),
+            navigator,
 
             speed: 0.0,
             steer: 0.0,
 
-            position: Position {
-                coordinates: (0.0, 0.0), 
-                orientation: 0.0 
-            },
+            position: start,
 
             debug: Default::default()
         }
@@ -69,9 +69,33 @@ pub struct Roundabout {
 }
 
 
+
+
+#[derive(Debug)]
+pub enum RoadTurnDirection {
+    CW, CCW
+}
+
 #[derive(Debug)]
 pub enum Road {
     // Straight { start: (f32,f32), end: (f32,f32) },
-    Turn { coordinates: (f32,f32), radius: f32, start_angle: f32, end_angle: f32 }
+    Turn { coordinates: (f32,f32), radius: f32, start_angle: f32, end_angle: f32, direction: RoadTurnDirection }
+}
+
+impl Road {
+    pub fn get_start(&self) -> Position {
+        match self {
+            Road::Turn { coordinates, radius, start_angle, direction, .. } => {
+                let x = coordinates.0 + radius * start_angle.cos();
+                let y = coordinates.1 + radius * start_angle.sin();
+                let a = start_angle + match direction {
+                    RoadTurnDirection::CW => -FRAC_PI_2,
+                    RoadTurnDirection::CCW => FRAC_PI_2,
+                };
+                return Position { coordinates: (x, y), orientation: a };
+            },
+        }
+        
+    }
 }
 

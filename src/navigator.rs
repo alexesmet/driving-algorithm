@@ -39,9 +39,13 @@ mod map {
         pub fn get_amount_of_roads(&self) -> usize {
             self.nodes.len()
         }
+        pub fn get_roads(&self) -> impl Iterator<Item=&Road> + '_ {
+            self.nodes.iter().map(|n| &n.road)
+        }
     }
 }
 
+pub use map::{RoadMap,RoadNode};
 use map::*;
 use crate::model::Road;
 
@@ -84,10 +88,10 @@ mod tests {
     #[test]
     fn can_follow_circular_road() {
 
-        let road_1 = Road::Turn { coordinates: ( 10., 10.), radius: 10., start_angle: (0.), end_angle: (0.) };
-        let road_2 = Road::Turn { coordinates: ( 10.,-10.), radius: 10., start_angle: (0.), end_angle: (0.) };
-        let road_3 = Road::Turn { coordinates: (-10.,-10.), radius: 10., start_angle: (0.), end_angle: (0.) };
-        let road_4 = Road::Turn { coordinates: (-10., 10.), radius: 10., start_angle: (0.), end_angle: (0.) };
+        let road_1 = Road::Turn { coordinates: ( 10., 10.), radius: 10., start_angle: (0.), end_angle: (0.), direction: crate::model::RoadTurnDirection::CCW };
+        let road_2 = Road::Turn { coordinates: ( 10.,-10.), radius: 10., start_angle: (0.), end_angle: (0.), direction: crate::model::RoadTurnDirection::CCW };
+        let road_3 = Road::Turn { coordinates: (-10.,-10.), radius: 10., start_angle: (0.), end_angle: (0.), direction: crate::model::RoadTurnDirection::CCW };
+        let road_4 = Road::Turn { coordinates: (-10., 10.), radius: 10., start_angle: (0.), end_angle: (0.), direction: crate::model::RoadTurnDirection::CCW };
 
         let road_map = RoadMap::new(vec![
              RoadNode { road: road_1, /* 0 */ next: vec![1] },
