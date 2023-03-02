@@ -163,6 +163,14 @@ impl Drawing for Road {
                     .points(points);
 
             },
+            Road::Line { start, end } => {
+                draw.line()
+                    .start(pt2(start.0, start.1))
+                    .end(pt2(end.0, end.1))
+                    .weight(2.0)
+                    .color(GAINSBORO);
+
+            },
         }
     }
 }

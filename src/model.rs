@@ -78,8 +78,8 @@ pub enum RoadTurnDirection {
 
 #[derive(Debug)]
 pub enum Road {
-    // Straight { start: (f32,f32), end: (f32,f32) },
-    Turn { coordinates: (f32,f32), radius: f32, start_angle: f32, end_angle: f32, direction: RoadTurnDirection }
+    Turn { coordinates: (f32,f32), radius: f32, start_angle: f32, end_angle: f32, direction: RoadTurnDirection },
+    Line { start: (f32,f32), end: (f32,f32) }
 }
 
 impl Road {
@@ -93,6 +93,9 @@ impl Road {
                     RoadTurnDirection::CCW => FRAC_PI_2,
                 };
                 return Position { coordinates: (x, y), orientation: a };
+            },
+            Road::Line { start, end } => {
+                return Position { coordinates: start.clone(), orientation: (end.1 - start.1).atan2(end.0 - start.0) }
             },
         }
         
