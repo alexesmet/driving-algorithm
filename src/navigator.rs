@@ -68,7 +68,9 @@ impl Navigator {
     pub fn get_road(&self) -> &Road {
         self.map.get_road_by_id(self.current_id)
     }
-
+    pub fn get_next_road(&self) -> &Road {
+        return self.map.get_road_by_id(self.map.get_next_roads(self.current_id)[0]);
+    }
     pub fn switch_to_next_road(&mut self) {
         self.current_id = self.map.get_next_roads(self.current_id)[0];
     }

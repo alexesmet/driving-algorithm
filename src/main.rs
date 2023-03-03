@@ -35,16 +35,16 @@ fn model(_app: &App) -> Model {
 
     // TODO: Implement loading map from file
 
-    let turn_1 = Road::Turn { coordinates: ( 200., 200.), radius: 100., start_angle: 0., end_angle:  FRAC_PI_2, direction: model::RoadTurnDirection::CCW };
-    let turn_2 = Road::Turn { coordinates: (-200., 200.), radius: 100., start_angle: FRAC_PI_2, end_angle:  PI, direction: model::RoadTurnDirection::CCW };
-    let turn_3 = Road::Turn { coordinates: (-200.,-200.), radius: 100., start_angle:-PI, end_angle: -FRAC_PI_2, direction: model::RoadTurnDirection::CCW };
-    let turn_4 = Road::Turn { coordinates: ( 200.,-200.), radius: 100., start_angle:-FRAC_PI_2, end_angle:  0., direction: model::RoadTurnDirection::CCW };
-    let road_1 = Road::Line { start: ( 300., -200.), end: ( 300.,  200.) };
-    let road_2 = Road::Line { start: ( 200.,  300.), end: (-200.,  300.) };
-    let road_3 = Road::Line { start: (-300.,  200.), end: (-300., -200.) };
-    let road_4 = Road::Line { start: (-200., -300.), end: ( 200., -300.) };
+    let turn_1 = Road::Turn { coordinates: ( 100., 100.), radius: 100., start_angle: 0., end_angle:  FRAC_PI_2, direction: model::RoadTurnDirection::CCW };
+    let turn_2 = Road::Turn { coordinates: (-100., 100.), radius: 100., start_angle: FRAC_PI_2, end_angle:  PI, direction: model::RoadTurnDirection::CCW };
+    let turn_3 = Road::Turn { coordinates: (-100.,-100.), radius: 100., start_angle:-PI, end_angle: -FRAC_PI_2, direction: model::RoadTurnDirection::CCW };
+    let turn_4 = Road::Turn { coordinates: ( 100.,-100.), radius: 100., start_angle:-FRAC_PI_2, end_angle:  0., direction: model::RoadTurnDirection::CCW };
+    let road_1 = Road::Line { start: ( 200., -100.), end: ( 200.,  100.) };
+    let road_2 = Road::Line { start: ( 100.,  200.), end: (-100.,  200.) };
+    let road_3 = Road::Line { start: (-200.,  100.), end: (-200., -100.) };
+    let road_4 = Road::Line { start: (-100., -200.), end: ( 100., -200.) };
 
-    let road_map = Rc::new(RoadMap::new(vec![
+    let map = Rc::new(RoadMap::new(vec![
          RoadNode { road: road_1, /* 0 */ next: vec![1] },
          RoadNode { road: turn_1, /* 1 */ next: vec![2] },
          RoadNode { road: road_2, /* 2 */ next: vec![3] },
@@ -55,13 +55,11 @@ fn model(_app: &App) -> Model {
          RoadNode { road: turn_4, /* 7 */ next: vec![0] },
     ]).expect("Should have created RoadMap"));
 
-    let navigator = Navigator::new(Rc::clone(&road_map), 0).expect("Should have created the navigator");
+    let navigator = Navigator::new(Rc::clone(&map), 0).expect("Should have created the navigator");
+    let mut car = Car::from_navigator(navigator);
+    car.position.coordinates = (150.0, -100.0);
 
-    Model { 
-        map: road_map,
-        car: Car::from_navigator(navigator),
-        debug
-    }
+    Model { map, car, debug }
 }
 
 fn update(_app: &App, model: &mut Model, _update: Update) {
@@ -81,16 +79,6 @@ fn view(app: &App, model: &Model, frame: Frame){
 
     if model.debug { model.car.draw_debug(&draw); }
     model.car.draw(&draw);
-
-    let pad = 6.0;
-    let car_debug = format!("{:#?}", model.car);
-    draw.text(&car_debug)
-            .h(win.pad(pad).h())
-            .w(win.pad(pad).w())
-            .line_spacing(pad)
-            .align_text_bottom()
-            .color(GRAY)
-            .left_justify();
 
     draw.to_frame(app, &frame).unwrap();
 }

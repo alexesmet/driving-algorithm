@@ -9,7 +9,7 @@ pub trait Physics {
 const EPSILON: f32 = 1.0;
 pub const BRAKES: f32 = 130.0 / UPS;
 pub const ACCELLERATION: f32 = 40.0 / UPS;
-pub const STEER_SPEED: f32 = 0.03 / UPS; // 0.01 is too hardcore for beginning, but is kinda real
+pub const STEER_SPEED: f32 = 0.03; // 0.01 is too hardcore for beginning, but is kinda real
 pub const MAX_STEER: f32 = 0.02;
 pub const MAX_SPEED: f32 = 170.0;
 
@@ -25,7 +25,7 @@ impl Physics for Car {
         }
 
         let steer_diff = self.desired_steer - self.steer;
-        self.steer += STEER_SPEED.min(steer_diff.abs()) * steer_diff.signum();
+        self.steer += (STEER_SPEED / UPS).min(steer_diff.abs()) * steer_diff.signum();
         self.steer = MAX_STEER.min(self.steer.abs()) * self.steer.signum();
 
         self.position.orientation += self.steer * self.speed / UPS;

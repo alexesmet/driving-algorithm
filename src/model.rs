@@ -100,5 +100,15 @@ impl Road {
         }
         
     }
+    pub fn get_end(&self) -> (f32,f32) {
+        match self {
+            Road::Turn { coordinates, radius, end_angle, .. } => {
+                (coordinates.0 + radius * end_angle.cos(), coordinates.1 + radius * end_angle.sin())
+            },
+            Road::Line { end, .. } => {
+                end.clone()
+            },
+        }
+    }
 }
 
