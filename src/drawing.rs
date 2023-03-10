@@ -119,15 +119,14 @@ impl DrawingDebug for Car {
 
 
 fn get_coords_for_wheels(origin: (f32, f32), rot: f32, shift: (f32, f32)) -> (f32, f32) {
-    let x = origin.0 + shift.0 * rot.cos() + shift.1 * -rot.sin();
-    let y = origin.1 + shift.0 * rot.sin() + shift.1 *  rot.cos();
-    return (x,y);
+    (origin.0 + shift.0 * rot.cos() + shift.1 * -rot.sin(),
+     origin.1 + shift.0 * rot.sin() + shift.1 *  rot.cos())
 }
 
 impl Drawing for RoadMap {
     fn draw(&self, draw: &Draw) {
         for road in self.get_roads() {
-            road.draw(&draw);
+            road.draw(draw);
         }
     }
 }
@@ -148,14 +147,19 @@ impl Drawing for Roundabout {
 impl Drawing for Road {
     fn draw(&self, draw: &Draw) {
         match self {
-            Road::Turn { coordinates, radius, start_angle, end_angle, .. } => {
+            Road::Turn { coordinates, radius, start_angle, end_angle, direction } => {
+                let (start_angle, end_angle) = match direction {
+                    crate::model::RoadTurnDirection::CCW => (start_angle, end_angle),
+                    crate::model::RoadTurnDirection::CW => (end_angle, start_angle)
+                };
+                let end_angle = if start_angle > end_angle { end_angle + PI * 2.0 } else { *end_angle };
                 let total_angle = end_angle - start_angle;
                 let angle_step = 5.0 * PI / radius;
                 let steps = (total_angle / angle_step).ceil() as i32;
                 let points = (0..=steps).map(|i| {
                     let angle = start_angle + i as f32 * angle_step;
                     pt2(coordinates.0 + radius * angle.cos(), coordinates.1 + radius * angle.sin())
-                });
+                }); 
 
                 draw.polyline()
                     .weight(2.0)

@@ -11,18 +11,12 @@ pub struct Position {
     pub orientation: f32
 }
 
-#[derive(Debug)]
+#[derive(Debug,Default)]
 pub struct CarDebugInfo {
     pub desired_position: Option<Position>,
     pub angle_to_position: Option<f32>,
     pub angle_to_orientation: Option<f32>,
     pub turning_angle: Option<f32>,
-}
-
-impl Default for CarDebugInfo {
-    fn default() -> Self {
-        Self { desired_position: None, angle_to_position: None, angle_to_orientation: None, turning_angle: None }
-    }
 }
 
 #[derive(Debug)]
@@ -92,10 +86,10 @@ impl Road {
                     RoadTurnDirection::CW => -FRAC_PI_2,
                     RoadTurnDirection::CCW => FRAC_PI_2,
                 };
-                return Position { coordinates: (x, y), orientation: a };
+                Position { coordinates: (x, y), orientation: a }
             },
             Road::Line { start, end } => {
-                return Position { coordinates: start.clone(), orientation: (end.1 - start.1).atan2(end.0 - start.0) }
+                Position { coordinates: *start, orientation: (end.1 - start.1).atan2(end.0 - start.0) }
             },
         }
         
@@ -106,7 +100,7 @@ impl Road {
                 (coordinates.0 + radius * end_angle.cos(), coordinates.1 + radius * end_angle.sin())
             },
             Road::Line { end, .. } => {
-                end.clone()
+                *end
             },
         }
     }

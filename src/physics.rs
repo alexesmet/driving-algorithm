@@ -9,9 +9,9 @@ pub trait Physics {
 const EPSILON: f32 = 1.0;
 pub const BRAKES: f32 = 130.0 / UPS;
 pub const ACCELLERATION: f32 = 40.0 / UPS;
-pub const STEER_SPEED: f32 = 0.03; // 0.01 is too hardcore for beginning, but is kinda real
+pub const STEER_SPEED: f32 = 0.025; // 0.03 for low speed // 0.01 for high speed
 pub const MAX_STEER: f32 = 0.02;
-pub const MAX_SPEED: f32 = 170.0;
+pub const MAX_SPEED: f32 = 200.0;
 
 impl Physics for Car {
     fn update(&mut self) {

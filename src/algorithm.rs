@@ -1,6 +1,6 @@
 use std::f32::consts::{FRAC_PI_4,FRAC_PI_2};
 
-use crate::model::{Car, Position, Road};
+use crate::model::{Car, Position, Road, RoadTurnDirection};
 use crate::physics::{MAX_STEER, STEER_SPEED};
 use crate::util::normalize_angle;
 
@@ -15,7 +15,7 @@ impl Thinker for Car {
         self.brakes = false;
 
         // find the closest position on the road
-        let DesiredPosition { position: desired_position, on_road_end } = get_desired_position_on_a_road(&self.position, &road);
+        let DesiredPosition { position: desired_position, on_road_end } = get_desired_position_on_a_road(&self.position, road);
 
         let distance_to_desired_position = ((self.position.coordinates.0-desired_position.coordinates.0).powi(2) +
                                             (self.position.coordinates.1-desired_position.coordinates.1).powi(2)).sqrt();
@@ -29,7 +29,7 @@ impl Thinker for Car {
         // - form of the road (primary)
         // - form of next part of road
         // - distance to next part of road
-        let taget_steering = get_taget_steering(&self, &road);
+        let taget_steering = get_taget_steering(self, road);
 
         // this relative angle points towards clothest point on a road
         let angle_to_position = normalize_angle(angle_to_desired_position - self.position.orientation);
@@ -41,7 +41,7 @@ impl Thinker for Car {
         let orientation_bias = get_orientation_bias(distance_to_desired_position);
         let turning_angle = angle_to_position * (1.0 - orientation_bias)  +  angle_to_orientation * (orientation_bias);
 
-        self.desired_speed = 130.;
+        self.desired_speed = 170.;
         self.desired_steer = turning_angle.abs().min(FRAC_PI_4) / FRAC_PI_4 * MAX_STEER * turning_angle.signum() + taget_steering * orientation_bias ;
 
         self.debug.desired_position = Some(desired_position);
@@ -61,7 +61,7 @@ struct DesiredPosition {
 }
 
 fn get_desired_position_on_a_road(position: &Position, road: &Road) -> DesiredPosition {
-    return match road {
+    match road {
         crate::model::Road::Turn { coordinates, radius, start_angle, end_angle, direction } => {
             let rel_x = position.coordinates.0 - coordinates.0;
             let rel_y = position.coordinates.1 - coordinates.1;
@@ -74,10 +74,13 @@ fn get_desired_position_on_a_road(position: &Position, road: &Road) -> DesiredPo
                     position.coordinates.1 - distance * angle.sin()
                 ),
                 orientation: angle + match direction {
-                    crate::model::RoadTurnDirection::CW => -FRAC_PI_2,
-                    crate::model::RoadTurnDirection::CCW => FRAC_PI_2,
+                    RoadTurnDirection::CW => -FRAC_PI_2,
+                    RoadTurnDirection::CCW => FRAC_PI_2,
                 }
-            }, on_road_end: angle > *end_angle || angle < *start_angle } // FIXME: rewrite w/ dir
+            }, on_road_end: match direction {
+                RoadTurnDirection::CW =>  *end_angle   > angle && angle > *start_angle,
+                RoadTurnDirection::CCW => *start_angle > angle && angle > *end_angle,
+            }}
         },
         crate::model::Road::Line { start, end } => {
             let start_to_end = (end.0 - start.0 , end.1 - start.1);
@@ -93,7 +96,7 @@ fn get_desired_position_on_a_road(position: &Position, road: &Road) -> DesiredPo
                 orientation: start_to_end.1.atan2(start_to_end.0)
             }, on_road_end: normalized_distance > 1.0 }
         },
-    };
+    }
 }
 
 fn get_taget_steering(car: &Car, road: &Road) -> f32 {
@@ -116,8 +119,11 @@ fn get_taget_steering(car: &Car, road: &Road) -> f32 {
 
 fn get_target_steering_for_road(road: &Road) -> f32 {
     match road {
-        // FIXME: mb multiply by direction in future
-        crate::model::Road::Turn { radius, .. } => 1.0 / radius,
+        crate::model::Road::Turn { radius, direction, .. } => match direction {
+            RoadTurnDirection::CW => -1.0 / radius,
+            RoadTurnDirection::CCW => 1.0 / radius,
+        }
+        ,
         crate::model::Road::Line { .. } => 0.0,
     }
 }
